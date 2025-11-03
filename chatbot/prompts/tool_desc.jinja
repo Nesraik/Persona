@@ -1,0 +1,68 @@
+[
+    {
+        "type": "function",
+        "function": {
+            "name": "search_google",
+            "description": "You should always call this function whenever you want to search something on Google. It is also preffered to call this function whenever user has a question that needs to be fact checked.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "The keywords you want to search on Google."
+                    }
+                },
+                "required": ["query"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "open_webpage",
+            "description": "It is preferred to call this function after search_google to find out more information and get the most objective and relevant results.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "urls": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "description": "The url of the webpage you want to open."
+                        },
+                        "description": "list of webpage urls that you want to open."
+                    }
+                },
+                "required": ["urls"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_current_date_and_time",
+            "description": "You should call this function whenever you want to know the current date and time.",
+            "parameters": {
+                "type": "object",
+                "properties":{}
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_youtube_video",
+            "description": "You should call this function whenever you want to search videos on youtube.",
+            "parameters": {
+                "type": "object",
+                "properties":{
+                    "keyword": {
+                        "type": "string",
+                        "description": "The keywords you want to search on youtube."
+                    }
+                },
+                "required": ["keyword"]
+            }
+        }
+    }
+]

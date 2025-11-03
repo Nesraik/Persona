@@ -1,0 +1,97 @@
+
+:root {
+  /* These are now your permanent dark theme colors */
+  --page-background: #121212;
+  --text-color: #e0e0e0;
+  --bot-bubble-color: #2a2a2a;
+  --user-bubble-color: #0dc98e;
+  --user-bubble-text: #ffffff;
+  --input-background: #1e1e1e;
+  --input-border: #444444;
+  --input-text: #e0e0e0;
+}
+
+.chat-send-button {
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.chat-send-button:hover {
+  opacity: 0.8;
+}
+
+.chat-send-button:active {
+  transform: scale(0.9);
+  opacity: 1; 
+}
+
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: var(--page-background);
+}
+
+.heading-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-color); /* Added text color */
+}
+
+.chat-messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.chat-messages-container::-webkit-scrollbar {
+  display: none;
+}
+
+.input-container {
+  padding: 1rem;
+  padding-top: 0.5rem;
+  background-color: var(--page-background); /* Use variable */
+}
+
+.input-container .bg-white {
+  background-color: var(--input-background) !important;
+  border-color: var(--input-border) !important;
+}
+
+.input-container textarea {
+  background-color: var(--input-background) !important;
+  color: var(--input-text) !important;
+}
+
+/* Set the dark mode placeholder text permanently */
+.input-container textarea::placeholder {
+  color: #888888;
+}
+
+/* Chat bubble styles */
+.chat-bubble {
+  padding: 10px 15px;
+  border-radius: 18px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.chat-bubble.user {
+  background-color: var(--user-bubble-color);
+  color: var(--user-bubble-text);
+  align-self: flex-end;
+}
+
+.chat-bubble.bot {
+  background-color: var(--bot-bubble-color);
+  color: var(--text-color);
+  align-self: flex-start;
+}

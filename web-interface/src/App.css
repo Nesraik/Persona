@@ -1,10 +1,8 @@
-
 :root {
   /* These are now your permanent dark theme colors */
   --page-background: #121212;
   --text-color: #e0e0e0;
-  --bot-bubble-color: #2a2a2a;
-  --user-bubble-color: #0dc98e;
+  --user-bubble-color: #2a2a2a;
   --user-bubble-text: #ffffff;
   --input-background: #1e1e1e;
   --input-border: #444444;
@@ -21,7 +19,7 @@
 
 .chat-send-button:active {
   transform: scale(0.9);
-  opacity: 1; 
+  opacity: 1;
 }
 
 
@@ -37,7 +35,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: var(--text-color); /* Added text color */
+  color: var(--text-color);
+  /* Added text color */
 }
 
 .chat-messages-container {
@@ -51,6 +50,7 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
 .chat-messages-container::-webkit-scrollbar {
   display: none;
 }
@@ -58,7 +58,8 @@
 .input-container {
   padding: 1rem;
   padding-top: 0.5rem;
-  background-color: var(--page-background); /* Use variable */
+  background-color: var(--page-background);
+  /* Use variable */
 }
 
 .input-container .bg-white {
@@ -91,7 +92,14 @@
 }
 
 .chat-bubble.bot {
-  background-color: var(--bot-bubble-color);
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  max-width: 100%;
+
   color: var(--text-color);
   align-self: flex-start;
+
+  margin-top: 10px;
+  margin-bottom: 10px;
 }

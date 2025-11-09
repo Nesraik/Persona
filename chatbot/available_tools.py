@@ -58,7 +58,7 @@ class Tools():
                 })
             webContent.append({
                     'title': article.title,
-                    'text': article.text,
+                    'text': article.summary,
                 })
         function_output = {
             'tool_call_id': "2",

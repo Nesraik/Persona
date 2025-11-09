@@ -1,5 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any
 import json
@@ -36,3 +37,20 @@ async def chat_endpoint(request: BotRequest):
     
     except Exception as e:
         return {"error": str(e)}
+    
+@app.post("/upload-pdf/")
+async def upload_pdf(file: UploadFile = File(...)):
+    # Check file type
+    if file.content_type != "application/pdf":
+        return JSONResponse(
+            status_code=400,
+            content={"error": "Only PDF files are allowed"}
+        )
+    
+    # Read the file content (if needed)
+    contents = await file.read()
+
+    with open(f"chatbot/input_files/uploaded_{file.filename}", "wb") as f:
+        f.write(contents)
+
+    return {"filename": file.filename, "content_type": file.content_type}

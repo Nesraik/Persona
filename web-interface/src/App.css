@@ -9,6 +9,7 @@
   --input-text: #e0e0e0;
 }
 
+
 .chat-send-button {
   transition: transform 0.1s ease, opacity 0.1s ease;
 }
@@ -20,6 +21,101 @@
 .chat-send-button:active {
   transform: scale(0.9);
   opacity: 1;
+}
+
+.chat-file-button {
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.chat-file-button:hover {
+  opacity: 0.8;
+}
+
+.chat-file-button:active {
+  transform: scale(0.9);
+  opacity: 1;
+}
+
+.file-chips-container {
+  display: flex;
+  flex-wrap: wrap; /* CRITICAL: Allows them to stack side-by-side */
+  gap: 8px;
+  padding: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* The main box for each file */
+.file-chip {
+  position: relative;
+  width: 160px; /* Fixed width creates the uniform box look */
+  height: 60px;
+  background-color: #303134; /* Dark gray background */
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-in;
+}
+
+/* Container for the text content */
+.file-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Top row: Filename */
+.file-name-top {
+  font-size: 12px;
+  font-weight: 500;
+  color: #e8eaed;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 15px; /* Make room for the close button so text doesn't overlap it */
+}
+
+/* Bottom row: Icon + Type */
+.file-type-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #9aa0a6;
+  font-weight: 600;
+}
+
+/* The red PDF icon */
+.file-icon-red {
+  color: #EA4335;
+  font-size: 14px;
+}
+
+/* Absolute positioned close button (top right corner) */
+.btn-close-file-absolute {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: transparent;
+  border: none;
+  color: #9aa0a6;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.btn-close-file-absolute:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
 

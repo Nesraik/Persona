@@ -4,7 +4,7 @@ function TextHeading() {
       className="text-center" 
       style={{
         position: 'absolute',    
-        top: '40%',              
+        top: '20%',              
         left: '50%',             
         transform: 'translate(-50%, -50%)'
       }}

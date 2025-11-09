@@ -155,7 +155,6 @@
   padding: 1rem;
   padding-top: 0.5rem;
   background-color: var(--page-background);
-  /* Use variable */
 }
 
 .input-container .bg-white {
@@ -168,12 +167,10 @@
   color: var(--input-text) !important;
 }
 
-/* Set the dark mode placeholder text permanently */
 .input-container textarea::placeholder {
   color: #888888;
 }
 
-/* Chat bubble styles */
 .chat-bubble {
   padding: 10px 15px;
   border-radius: 18px;
@@ -199,3 +196,44 @@
   margin-top: 10px;
   margin-bottom: 10px;
 }
+
+.chat-messages-container,
+.file-chips-container,
+.input-container textarea {
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+  transition: scrollbar-color 0.3s ease;
+}
+
+.chat-messages-container::-webkit-scrollbar,
+.file-chips-container::-webkit-scrollbar,
+.input-container textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-messages-container::-webkit-scrollbar-track,
+.file-chips-container::-webkit-scrollbar-track,
+.input-container textarea::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+.chat-messages-container::-webkit-scrollbar-thumb,
+.file-chips-container::-webkit-scrollbar-thumb,
+.input-container textarea::-webkit-scrollbar-thumb {
+  background-color: transparent; 
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.chat-messages-container:hover,
+.file-chips-container:hover,
+.input-container textarea:hover {
+  scrollbar-color: #424242 #6e6e6e;
+}
+
+.chat-messages-container:hover::-webkit-scrollbar-thumb,
+.file-chips-container:hover::-webkit-scrollbar-thumb,
+.input-container textarea:hover::-webkit-scrollbar-thumb {
+  background-color: #6e6e6e; 
+}
+

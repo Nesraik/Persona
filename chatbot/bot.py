@@ -65,11 +65,13 @@ class Chatbot(Tools):
         return response.choices[0].message
 
     def generate_single_chat_message(self,user_prompt,messages,flag, files, session_id):
-
-        if os.listdir("vectordb") != [] or files:
-            self.Retriever = ContextRetriever(files=files, session_id=session_id)
-            context = self.Retriever.retrieveContext(user_message=user_prompt,chat_history=messages)
-            
+        try:
+            if os.listdir("vectordb") != [] or files:
+                self.Retriever = ContextRetriever(files=files, session_id=session_id)
+                context = self.Retriever.retrieveContext(user_message=user_prompt,chat_history=messages)
+        except:
+            context = None
+         
         temp = {
             "tools": self.tools,
             "context": context if context else "No additional context provided."
@@ -78,7 +80,10 @@ class Chatbot(Tools):
         system_prompt = process_template('prompts/system_prompt.jinja', temp)
 
         if flag == False:
-            shutil.rmtree("vectordb", ignore_errors=True)
+            try:
+                shutil.rmtree("vectordb")
+            except:
+                pass
             os.makedirs("vectordb", exist_ok=True)
 
             messages = [

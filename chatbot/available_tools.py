@@ -2,7 +2,7 @@ from googleapiclient.discovery import build
 import os
 from newspaper import Article, Config
 import datetime
-from langfuse.decorators import observe
+from langfuse import observe
 
 class Tools():
     # Normal response

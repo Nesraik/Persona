@@ -24,7 +24,7 @@ function ChatInput({ onSendMessage }: ChatInputProps) {
   };
 
   const handleSend = () => {
-    if (inputValue.trim() === "" && selectedFiles.length === 0) return;
+    if (inputValue.trim() === "") return;
     onSendMessage(inputValue.trim(), selectedFiles);
     setInputValue("");
     setSelectedFiles([]);

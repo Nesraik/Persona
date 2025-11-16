@@ -1,16 +1,17 @@
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from http.client import responses
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from chromadb import EmbeddingFunction
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import partial
+from utils.parser import clean_context_text, extract_json_dict
 import os
 import json
 import chromadb
 from uuid import uuid4
-from langfuse.decorators import observe
 from sentence_transformers import SentenceTransformer
 import torch
 from langfuse.openai import OpenAI
-from langfuse import Langfuse
+from langfuse import Langfuse, observe
 from langchain_community.document_loaders import PDFPlumberLoader
 from dotenv import load_dotenv
 from utils.jinjaProcessor import process_template
@@ -37,14 +38,19 @@ class MultilingualEmbeddingFunction(EmbeddingFunction):
         return embeddings.tolist()
     
 class ContextRetriever:
-    def __init__(self, dbpath):
+    def __init__(self, files, session_id, dbpath = "vectordb"):
         self.custom_emb_func = MultilingualEmbeddingFunction()
         self.dbclient = chromadb.PersistentClient(path=dbpath)
-        self.client_gemini = OpenAI(api_key=os.environ["GEMINI_API_KEY"], base_url=os.environ["GEMINI_BASE_URL"])
+        self.client= OpenAI(api_key=os.environ["GEMINI_API_KEY"], base_url=os.environ["GEMINI_BASE_URL"])
+
+        if files:
+            self.dbcollection = self._appendDbCollection(files=files, session_id=session_id)
+        else:
+            self.dbcollection = self._getDbCollection(session_id=session_id)
     
-    def _createDbCollection(self, files):
+    def _appendDbCollection(self, files, session_id):
         dbcollection = self.dbclient.create_collection(
-            name="USERINPUT", embedding_function=self.custom_emb_func
+            name=session_id, embedding_function=self.custom_emb_func
         )
 
         # initialize text splitter
@@ -68,64 +74,74 @@ class ContextRetriever:
             dbcollection.add(
                 documents=str(doc),
                 ids=str(uuid4()),
-                metadatas={"source": self.filename, "chunk": i},
+                metadatas={"chunk": i},
             )
 
         return dbcollection
 
-    def _getDbCollection(self):
-        return self.dbclient.get_collection(name="USERINPUT", embedding_function=self.custom_emb_func)
+    def _getDbCollection(self, session_id):
+        return self.dbclient.get_collection(name=session_id, embedding_function=self.custom_emb_func)
     
-    @observe(name="gemini_infer")
-    def _infer_gemini(self,messages):
-        response = self.client_gemini.chat.completions.create(
-            model="gemini-2.0-flash",
-            messages=messages,
+    @observe(name = "Rewrite Query")
+    def _rewriteQuery(self,messages):
+        response = self.client.chat.completions.create(
+            model = "gemini-2.0-flash",
+            messages = messages,
             temperature=0.1,
-            top_p=0.1
+            top_p=0.1,
+            presence_penalty=0.0,
         )
-        return response.choices[0].message.content.strip()
+        return response.choices[0].message.content
     
-    @observe(name="split_user_query")
-    def _split_user_query(self,user_query, chat_history):
+    def _retrieveSubQueryContext(self, subquery):
+        results = self.dbcollection.query(
+            query_texts=subquery,
+            n_results=2,
+        )
+        chunks = []
+        for i, doc in enumerate(results['documents'][0]):
+            print(doc)
+            chunks.append(f"===Chunk {i}===\n{clean_context_text(doc)}\n")
+        print("test")
+        return chunks
+    
+    @observe()
+    # Retrieve and Generate (RAG)
+    def retrieveContext(self, user_message, chat_history):
 
+        if len(chat_history) != 0:
+            chat_history.pop(0)
+        
         temp = {
-            "user_input": user_query,
+            "user_message": user_message,
             "chat_history": chat_history
         }
 
-        user_prompt = process_template("prompt/split_user_query_prompt.jinja", temp)
+        user_prompt = process_template('prompts/query_rewritter_prompt.jinja', temp)
 
         messages = [
-            {"role": "user", "content": user_prompt}
+            {
+                "role": "system",
+                "content": "You are a helpful assistant that rewrites user message into relevant query for RAG."
+            },
+            {
+                "role": "user",
+                "content": user_prompt
+            }
         ]
 
-        response = self._infer_gemini(messages)
-
-        sub_queries = json.loads(response)
-
-        return sub_queries
-    
-    @observe(name="retrieve_contexts")
-    def retrieve_contexts(self, conversation_log, files, top_k=3):
-        user_query = conversation_log[-1]['content']
-        chat_history = [msg['content'] for msg in conversation_log[:-1] if msg['role'] != 'system']
-
-        sub_queries = self._split_user_query(user_query, chat_history)
-
-        if len(sub_queries) == 0:
+        response = self._rewriteQuery(messages)
+        response = extract_json_dict(response)
+        
+        if response['Rewritten query'] == "NONE":
             return "No relevant information found."
         else:
-            context_list = []            
-            for subquery in sub_queries:
-                results = self.dbcollection.query(
-                    query_texts=subquery,
-                    n_results=top_k,
-                )
-                for doc in results['documents'][0]:
-                    context_list.append(doc)
-
+            context_list = []
+            with ThreadPoolExecutor(max_workers=5) as executor:  
+                futures = [executor.submit(self._retrieveSubQueryContext, sq) for sq in response['Subquery']]
+                for future in as_completed(futures):
+                    context_list.extend(future.result())
+        
         context = "\n".join(doc for doc in context_list)
-
         return context
     

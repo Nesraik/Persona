@@ -1,8 +1,10 @@
 from available_tools import Tools
-from langfuse import Langfuse
+from langfuse import Langfuse, observe
 from langfuse.openai import OpenAI
-from langfuse.decorators import observe
+from rag import ContextRetriever
 import json
+import shutil
+import os
 from utils.jinjaProcessor import *
 import requests
 from dotenv import load_dotenv
@@ -62,18 +64,23 @@ class Chatbot(Tools):
                 )
         return response.choices[0].message
 
-    def generate_single_chat_message(self,user_prompt,messages,flag):
+    def generate_single_chat_message(self,user_prompt,messages,flag, files, session_id):
 
-        #context = self.Retriever.retrieveContext(user_message=user_prompt,chat_history=messages)
-
+        if os.listdir("vectordb") != [] or files:
+            self.Retriever = ContextRetriever(files=files, session_id=session_id)
+            context = self.Retriever.retrieveContext(user_message=user_prompt,chat_history=messages)
+            
         temp = {
             "tools": self.tools,
-            #"context": context
+            "context": context if context else "No additional context provided."
         }
 
         system_prompt = process_template('prompts/system_prompt.jinja', temp)
 
         if flag == False:
+            shutil.rmtree("vectordb", ignore_errors=True)
+            os.makedirs("vectordb", exist_ok=True)
+
             messages = [
                 {
                     "role": "system",
@@ -96,7 +103,8 @@ class Chatbot(Tools):
             response = self._generate_response(messages)
             messages.append({
                 "role": "assistant",
-                "content": response.content
+                "content": response.content,
+                "tool_calls": response.tool_calls if response.tool_calls is not None else []
             })
 
             if response.tool_calls is None:

@@ -1,0 +1,29 @@
+# Chat history
+{{chat_history}}
+
+# Current user message
+{{user_message}}
+
+# Task
+- Based on the given **Chat history**, rewrite the given user message in **Current user message** into an useful query for RAG.
+- After rewriting it to useful query, split said query into smaller subquery based on the existing object (follow the **Examples** provided above) on previous query
+
+# Follow this output format using this json schema:
+{
+  "name": "answer_schema",
+  "strict": true,
+  "schema": {
+    "Rewritten query": {
+      "type": "string",
+      "description": "If based on the given **Chat history**, the given user message in **Current user message** can be answer without the need of RAG or the user message does not need fact checking, output 'NONE', else output the rewritten query"
+    },
+    "Subquery": {
+      "type": "list",
+      "description": "Output the subqueries".
+    },
+    "required": ["Rewritten query", "Subquery"]
+  }
+}
+
+only return a JSON object populated with values.
+Always output your answer using ```json\n{...}\n```

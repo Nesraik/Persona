@@ -14,54 +14,27 @@ langfuse = Langfuse()
 class Chatbot(Tools):
     def __init__(self):
         super().__init__()
-        self.api_keys = []
-        self.current_index = 0
-        self._insert_api_key()
         self.tools = json.loads(process_template_no_var('prompts/tool_desc.jinja'))
+        self.client = OpenAI(
+            base_url=os.environ.get("GEMINI_BASE_URL"),
+            api_key= os.environ.get("GEMINI_API_KEY")
+        )
         self.functions = {
             "search_google": self.search_google,
             "open_webpage": self.open_webpage,
             "get_current_date_and_time": self.get_current_date_and_time,
             "search_youtube_video": self.search_youtube_video
         }
-           
-    def _insert_api_key(self):
-        with open("llm_api_keys.txt") as f:
-            for line in f.readlines():
-                self.api_keys.append(line.strip())
-
-    def _get_client(self):
-        return OpenAI(
-            base_url=os.environ.get("CHATBOT_BASE_URL"),
-            api_key= self.api_keys[self.current_index]
-        )
-    
+        
     @observe(name = "bot_response")
     def _generate_response(self,messages):
-        try:
-            client = self._get_client()
-            response = client.chat.completions.create(
-                model = os.environ.get("CHATBOT_MODEL"),
-                messages = messages,
-                tools= self.tools,
-                temperature=0.1,
-                top_p=0.1,
-                presence_penalty=0.0,
-                frequency_penalty=0.0,
-            )
-        except requests.exceptions.HTTPError as e:
-            if response.status_code == 429:
-                self.current_index = (self.current_index + 1) % len(self.api_keys)
-                client = self._get_client()
-                response = client.chat.completions.create(
-                    model = os.environ.get("CHATBOT_MODEL"),
-                    messages = messages,
-                    tools= self.tools,
-                    temperature=0.1,
-                    top_p=0.1,
-                    presence_penalty=0.0,
-                    frequency_penalty=0.0,
-                )
+        response = self.client.chat.completions.create(
+            model = "gemini-2.5-flash-lite",
+            messages = messages,
+            tools= self.tools,
+            temperature=0.1,
+            top_p=0.1,
+        )
         return response.choices[0].message
 
     def generate_single_chat_message(self,user_prompt,messages,flag, files, session_id):
@@ -122,7 +95,6 @@ class Chatbot(Tools):
 
                 # Check for function name
                 try:
-                    print("Tool Function Name:", tool.function.name)
                     function_name = self.functions[tool.function.name]
                 except:
                     messages.append({

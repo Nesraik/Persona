@@ -29,11 +29,12 @@ class Chatbot(Tools):
     @observe(name = "bot_response")
     def _generate_response(self,messages):
         response = self.client.chat.completions.create(
-            model = "gemini-2.5-flash-lite",
+            model = "gemini-2.5-flash",
             messages = messages,
             tools= self.tools,
             temperature=0.1,
             top_p=0.1,
+            reasoning_effort = "none"
         )
         return response.choices[0].message
 
